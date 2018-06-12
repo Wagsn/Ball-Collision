@@ -10,25 +10,26 @@ let databus = new DataBus();
 let w = window.innerWidth
 let h = window.innerHeight
 /**
- * 道具地图，包含道具组的显示，对已使用道具的回收
+ * 类名风格：Game_Map，方法风格：drawToCanvas，属性风格：start_x。
+ * 表示一个房间，也可以是一个关卡，数组有一个隐含key就是索引，可以大大减少 type等重复出现
  */
 export default class Prop_Map {
   /**
-   * 初始化，并计算每个道具的位置
+   * Room:
    */
   constructor(m) {
     // Important information on a map
-    this.p_id = m.pId || 0;
-    this.id = m.id || 0;
-    this.cols = m.cols;  // 显示的列数
-    this.rows = m.rows;  // 显示的行数 多余的不显示，少的填空位
+    this.p_id = m.pId;
+    this.id = m.id;
+    this.columns = m.columns;  // 
+    this.rows = m.rows    // 
     this.mat_data = m.data
     // The size of a map on the interface
-    this.sx = 0;  // top-left
-    this.sy = 9 * h / 10;
-    this.sw = w;
-    this.sh = 9 * h / 10;
-    this.sr = 15;
+    this.s_x = 0;  // top-left
+    this.s_y = 9 * h / 10;
+    this.s_w = w;
+    this.s_h = 9 * h / 10;
+    this.s_r = 15;
     // 地图的样式风格
     this.style = {
       // 内部元素之间的间距，根据输入的 map size 动态计算
@@ -57,14 +58,14 @@ export default class Prop_Map {
       this.style.vertical_space = 0
     } else if (draw_style_tag == 'dynamic_size_space') { }
     else if (draw_style_tag === 'dynamic_space') {  // 在内部元素不超过最大尺寸限制时，以其尺寸为标准计算其间隔
-      let max_w = (this.sw - this.style.padding_left - this.style.padding_right) / this.cols
+      let max_w = (this.s_w - this.style.padding_left - this.style.padding_right) / this.columns
       let d_w = max_w > this.inner_width ? this.inner_width : max_w
-      let max_h = (this.sh - this.style.padding_top - this.style.padding_bottom) / this.rows
+      let max_h = (this.s_h - this.style.padding_top - this.style.padding_bottom) / this.rows
       let d_h = this.inner_height > max_h ? max_h : this.inner_height
       // 计算内部元素的绘制尺寸
       let d_s = this.inner_width = this.inner_height = d_w > d_h ? d_h : d_w
-      this.style.horizontal_space = (this.sw - this.style.padding_left - this.style.padding_right - this.inner_width * this.cols) / (this.cols - 1)
-      this.style.vertical_space = (this.sh - this.style.padding_top - this.style.padding_bottom - this.inner_height * this.rows) / (this.rows - 1)
+      this.style.horizontal_space = (this.s_w - this.style.padding_left - this.style.padding_right - this.inner_width * this.columns) / (this.columns - 1)
+      this.style.vertical_space = (this.s_h - this.style.padding_top - this.style.padding_bottom - this.inner_height * this.rows) / (this.rows - 1)
     }
     // 初始化地图每格的显示位置及地图数据
     this.data = [];
@@ -72,9 +73,10 @@ export default class Prop_Map {
       if (m.data[i].length > 0) {
         let temp = new Prop();
         let props = {
-          sx: this.sx + this.style.padding_left + i * (this.style.horizontal_space + this.inner_width),
-          sy: 14 * h / 15,
-          sr: this.sr,
+          my: i,
+          x: this.s_x + this.style.padding_left + i * (this.style.horizontal_space + this.inner_width),
+          y: 14 * h / 15,
+          r: this.s_r,
           type: m.data[i][0]
         };
         temp.init(props);
@@ -84,21 +86,12 @@ export default class Prop_Map {
     }
   }
   /**
-   * Calculating position，
-   * 需要data，显示区域
-   */
-  calLoc(){}
-  /**
-   * 当弹射球发射时调用，回收已使用道具，重新计算每个道具的位置
-   */
-  update(){}
-  /**
    * 检查对象回收，可以隔段时间检查一次
    */
   checkRecover() {
     for (let i = this.data.length; i > -1; i--) {
       if (!this.data[i].isAlive) {
-        databus.recoverToPool('prop', this.data.splice(i, 1))
+        databus.recoverToPool('tile', this.data.splice(i, 1))
       }
     }
   }
@@ -108,14 +101,14 @@ export default class Prop_Map {
    */
   drawTo(ctx) {
     for (let i = 0; i < this.data.length; i++) {
-      this.data[i].drawTo(ctx);
+      this.data[i].draw(ctx);
     }
   }
   /**
    * 根据持久化存储对象初始化运行时对象
-   * @param {Object} o 
+   * @param {Object} data 
    */
-  init(o) {
+  init(data) {
   }
   /**
    * 返回持久化存储对象

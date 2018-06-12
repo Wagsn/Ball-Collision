@@ -3,41 +3,32 @@
 import Point from '../base/point'
 import DataBus from '../databus'
 import Util from '../util/util';
-import Circle from '../base/circle';
 
 let databus = new DataBus()
+const TAU = 2 * Math.PI;
 
-/**
- * 道具类，
- * 在弹射球选中之前可以被选中，
- * 在弹射球发射之后，被选中的道具将调用作用函数作用于弹射球，并且在道具组中移出
- */
 export default class Prop {
-  constructor(o) {
-    if (o !== undefined) { this.init(o); } else { this.init({}); }
+
+  constructor() {
+    // 坐标
+    this.r = 10;
+    this.color = "#000";
+    // 选中标志位
+    this.check = 0;
+
+    this.touchstart = false;
+		
     // 事件监听初始化
     this.initEvent();
   }
-  /**
-   * 初始化
-   * @param {Object} o 
-   */
   init(o) {
-    this.id = o.id || 0;  // 0 表示默认id
-    this.color = "#000";
-     // 选中标志位
-    this.checked = false;
-    // 当发生touchstart事件时，该道具
-    this.touchstart = false;
-    // 显示所占区域
-    this.sx = o.sx || 0;
-    this.sy = o.sy || 0;
-    this.sr = o.sr || 30;
-    // 地图所占区域
-    this.mx = o.mx || 0;
-    this.my = o.my || 0;
-    this.mr = o.mr || 30;
-    this.type =o.type || '';    
+    // 坐标
+    this.id = o.id;
+    this.x = o.x;
+    this.y = o.y;
+    // 半径
+    this.r = o.r;
+    this.type = o.type;
     switch (o.type) {
       case 'wall':
         this.color = '#F17C67'
@@ -59,37 +50,43 @@ export default class Prop {
         break;
     }
   }
+
   /**
    * 逻辑刷新
    */
-  update() {}
+  update() {
+
+  }
   /**
    * 重绘自身
    * @param {CanvasRenderingContext2D} ctx 
    */
-  drawTo(ctx) {
-    // 绘制自身
-    Circle.drawFillCircle(ctx, this.color, (0.5 + this.sx)|0, (0.5 + this.sy)|0, this.sr);
-    // 绘制选中圈
-    if (this.checked === true) {
-      Circle.drawStrokeCircle(ctx, "red", (0.5 + this.sx)|0, (0.5 + this.sy)|0, this.sr, 8);
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.lineWidth = 8;
+    ctx.arc((0.5 + this.x) | 0, (0.5 + this.y) | 0, this.r, 0, TAU, false);
+    ctx.fillStyle = this.color;
+    if (this.check === 1) {
+      ctx.strokeStyle = "red";
+      ctx.stroke();
     }
+    ctx.fill();
   }
   /**
    * 事件监听初始化
    */
   initEvent() {
     databus.eventManager.addListener('touchstart', (e) => {
-      if (Util.distanceBetweenTwoPoints(this.sx, this.sy, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.sr) {
+      if (Util.distanceBetweenTwoPoints(this.x, this.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.r) {
         this.touchstart = true;
       }
     })
     databus.eventManager.addListener('touchend', (e) => {
-      if (!databus.ballIsRun && this.touchstart === true && Util.distanceBetweenTwoPoints(this.sx, this.sy, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.sr) {
-        if (this.checked === true) {
-          this.check = false;
+      if (!databus.ballIsRun && this.touchstart === true && Util.distanceBetweenTwoPoints(this.x, this.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.r) {
+        if (this.check === 0) {
+          this.check = 1;
         } else {
-          this.check = true;
+          this.check = 0;
         }
       }
       this.touchstart = false;

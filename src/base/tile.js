@@ -20,17 +20,16 @@ export default class Tile {
     this.id = o.id || 0
     this.type = o.type || 'flat'  // 根据type产生的一些数据
     // 地图坐标，为整数
-    this.mx = o.mx || this.mx || 0;
-    this.my = o.my || this.my || 0;
-    this.mr = o.mr || this.mr || 0;
+    this.mx = o.mx || this.mx || 0
+    this.my = o.my || this.my || 0
     // 显示位置
     this.sx = o.sx || 10;
     this.sy = o.sy || 10;
     this.sw = o.sw || 10;
     this.sh = o.sh || 10;
-    //this.sx0 = this.sx + this.sw / 2; // 当传入矩形计算圆心坐标
-    //this.sy0 = this.sy + this.sh / 2;;
-    this.sr = o.sr || (this.sw > this.sh ? this.sh / 2 : this.sw / 2) || 15;
+    //this.s_x0 = this.s_x + this.s_w / 2; // 当传入矩形计算圆心坐标
+    //this.s_y0 = this.s_y + this.s_h / 2;;
+    this.sr = o.sr || (this.s_w > this.s_h ? this.s_h / 2 : this.s_w / 2) || 15;
     // 根据tpe选择颜色
     switch (o.type) {
       case 'wall':
@@ -56,11 +55,11 @@ export default class Tile {
     this.isAlive = true;  // 表示是否需要被回收
 
     // 先将自身绘制到离屏画布上
-    //let offctx =this.offCanvas.getContext('2d');
-    //offctx.beginPath();
-    //offctx.fillStyle = this.color;
-    //offctx.arc(this.sx || 0, this.sy || 0, this.sr, 0, TAU, false);
-    //offctx.fill();
+    let offctx =this.offCanvas.getContext('2d');
+    offctx.beginPath();
+    offctx.fillStyle = this.color;
+    offctx.arc(this.sx || 0, this.sy || 0, this.sr, 0, TAU, false);
+    offctx.fill();
   }
   /**
    * 将自身绘制在canvas上
@@ -68,7 +67,7 @@ export default class Tile {
    */
   drawTo(ctx) {
     if (!this.visible) { return }
-    //ctx.drawImage(this.offCanvas, 0, 0)  // 性能消耗非常严重
+    //ctx.drawImage(this.offCanvas, 0, 0)
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.arc(this.sx || 0, this.sy || 0, this.sr, 0, TAU, false);

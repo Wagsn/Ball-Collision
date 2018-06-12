@@ -28,7 +28,6 @@ export default class Game_Map {
     this.sy = m.sy || 0;
     this.sw = m.sw || 200;
     this.sh = m.sh || 200;
-    console.log('x:'+this.sx+', y:'+this.sy+', w:'+this.sw+', h:'+this.sh);
     // the size of map，在地图上所占区域
     this.mx = m.mx || 0;
     this.my = m.my || 100;
@@ -49,7 +48,6 @@ export default class Game_Map {
       padding_lef: m.paddingLeft || m.padding || padding_default,
       padding_rig: m.paddingRight || m.padding || padding_default
     }
-    console.log('padding: '+m.padding)
     // inner element size, also can be dynamic calculation by Interface size
     this.inner_width = m.innerWidth || inner_side_length_default
     this.inner_height = m.innerHeight || inner_side_length_default
@@ -89,7 +87,6 @@ export default class Game_Map {
     }
     // 初始化地图每格的显示位置及地图数据
     this.data = [];
-    console.log(m.data);
     for (let i = 0; i < m.data.length; i++) {  // 行数
       for (let j = 0; j < m.data[i].length; j++) {  // 列数
           let temp = new Tile();

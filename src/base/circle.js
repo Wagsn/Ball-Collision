@@ -2,7 +2,7 @@
 
 
 /**
- * 一个圆用于显示，包含颜色，屏幕显示区域
+ * 一个圆用于显示，包含颜色，相对显示位置
  */
 
 export default class Circle {
@@ -48,21 +48,5 @@ export default class Circle {
     ctx.beginPath()
     ctx.arc(x, y, r, 0, 2*Math.PI, false)
     ctx.fill()  //画实心圆
-  }
-  /**
-   * 
-   * @param {CanvasRenderingContext2D} ctx 
-   * @param {*} color 
-   * @param {*} x 
-   * @param {*} y 
-   * @param {*} r 
-   * @param {*} lw 
-   */
-  static drawStrokeCircle(ctx, color, x, y, r, lw){
-    ctx.lineWidth = lw;
-    ctx.strokeStyle = color;
-    ctx.beginPath()
-    ctx.arc(x, y, r, 0, 2*Math.PI, false)
-    ctx.stroke();
   }
 }

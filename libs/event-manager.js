@@ -14,26 +14,31 @@ export default class EventManager{
     console.log('In EventManager.Constructor')
     this.targets = new WS_EventTarget()
     this.events = []  // events: [move: {type: player_move_normal, direction: 3.14}]
-    // 格式：register:{type:'btn_checked',wrap:fn,events:['touchstart','touchend'],callback:{touchstart:fn,touchend:fn},detail:{lastTouch:{x,y}}}
-    let register =
-    {
-      type:'btn_checked',
-      wrap:(e)=>{},
-      events:['touchstart','touchend'],
-      callback:{
-        touchstart:(e)=>{},
-        touchend:(e)=>{}
-      },
-      detail:{
-        lastTouch:{
-          x: 10,
-          y: 10
-        }
-      }
+    // 格式：register:{type:'btn_checked',case:{events:['touchstart','touchend'],determine:{touchstart:fn,touchend:fn},detail:{lastTouch:{x,y}}}}
+    let register = 
+    { 
+      type: 'btn_checked', 
+      events: ['touchstart', 'touchend'], 
+      wrap: (e)=>{},
+      touchstart: (e)=>{}, 
+      touchend: (e)=>{},
+      lastTouch: { x: 100, y:100 } 
     }
     this.registers = []  // 事件登记表
-    // this.responses = new Map()  // 响应事件表，每种响应类型（events中的type） 作为key
     this.initEvent()  // 将自定义事件绑定在系统事件上
+  }
+  /**
+   * 将被触发的事件处理掉（调用监听者事件处理函数）
+   * isSys 是否响应系统事件，如果不响应系统事件则表明为自定义事件
+   */
+  handle(){
+    //
+  }
+  /**
+   * 触发事件发生，当被调用时触发某类事件的发生
+   */
+  trigger(){
+    //
   }
   /**
    * 供外部调用，
@@ -89,6 +94,7 @@ export default class EventManager{
    * 事件的链式触发，如：touch=>rocker_checked=>player_move_normal（原有逻辑是两个事件分别判断是否被touch事件触发），
    * 注意：不能创建循环触发事件，即A被B触发而B又A触发，
    * e: WS_Event
+   * @returns{WS_Event[]}
    */
   response(e) { // 传入触发事件 WS_Event 
     let events = [] // 被触发事件集
@@ -96,12 +102,9 @@ export default class EventManager{
     // 遍历登记表，计算被传入事件触发的事件，
     // TODO：将触发事件分组，如：registers[e.type]: [Register,Register,Register]表示响应e.type事件的register数组
     // registers: {touchmove: [Register], touchend: [], ...}
-    // registers
-    //this.registers[e.type].forEach((item)=>{})
     this.registers.forEach((item) => { // item 表示各个 register
       // 如果存在触发事件的判定函数，且判定函数返回值为true（表示该登记表的事件被触发）
-      
-      if (item.callback[e.type] !== undefined && item.callback[e.type](e)) { // 判断事件是否被触发
+      if (item[e.type] !== undefined && item[e.type](e)) { // 判断事件是否被触发
         let event = new WS_Event(item.type, e)
         // 增加附带信息
         item.wrap(event)
@@ -120,6 +123,7 @@ export default class EventManager{
    * 不提供外部调用
    * 事件处理工厂函数，
    * 系统事件和本地事件的连接器与缓冲区
+   * @returns{(e)=>{}}
    */
   eventHandlerFactory(type) { // 返回一个 event handler 函数
     return (e) => {
@@ -162,6 +166,8 @@ class WS_EventTarget { // 此类型的事件集
   }
   /**
    * 添加type类型的事件listener
+   * @param{String} type 事件类型
+   * @param{(e)=>{}} listener 监听器
    */
   addEventListener(type, listener) {
     //
@@ -190,6 +196,8 @@ class WS_EventTarget { // 此类型的事件集
   }
   /**
    * 移除type类型的事件listener
+   * @param{String} type 事件类型
+   * @param{(e)=>{}} listener 监听器
    */
   removeEventListener(type, listener) {
     let listeners = ws_gobal_events.get(this)[type]  // 获取type事件的监听者集
@@ -205,9 +213,10 @@ class WS_EventTarget { // 此类型的事件集
   }
   /**
    * 唤醒type事件的监听者，需要传入event(事件，包含type以及监听者处理事件所需的参数)
+   * @param{WS_Event} event 事件
    */
-  dispatchEvent() {
-    let event = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
+  dispatchEvent(e) {  // 派遣
+    let event = e !== undefined ? e : {}
 
     let listeners = ws_gobal_events.get(this)[event.type]
 

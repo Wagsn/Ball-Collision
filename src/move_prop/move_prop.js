@@ -18,7 +18,7 @@ export default class Prop {
     this.check = 0;
     this.ok = false;
     this.touchstart = false;
-		
+		this.move_prop_moving = false;
     // 事件监听初始化
     this.initEvent();
   }
@@ -50,6 +50,9 @@ export default class Prop {
   update() {
 
   }
+  create(){
+  	
+  }
   /**
    * 重绘自身
    * @param {CanvasRenderingContext2D} ctx 
@@ -66,26 +69,30 @@ export default class Prop {
   initEvent() {
 
     databus.eventManager.addListener('touchstart', (e) => {
-			if(databus.player.check2 === 1){
-				return;
-				}
+    	if(this.ok||databus.player.check2 === 1){
+  		return
+  	}
       if (Util.distanceBetweenTwoPoints(this.x, this.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.r) {
         this.touchstart = true;
       }
     })
     databus.eventManager.addListener('touchmove', (e) => {
-			  if(databus.player.check2 === 1){
-				return;
-				}
-      if (this.touchstart === true) {
+    	if(this.ok||databus.player.check2 === 1){
+  		return
+  	}
+      if (this.touchstart === true) {	
         this.x = e.changedTouches[0].clientX;
         this.y = e.changedTouches[0].clientY;
+        this.move_prop_moving = true;
       }
     })
     databus.eventManager.addListener('touchend', (e) => {
-  
+
       if (!databus.ballIsRun && this.touchstart === true && Util.distanceBetweenTwoPoints(this.x, this.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY) < this.r) {
-       let tile = {
+			if(this.ok||databus.player.check2 === 1){
+  		return
+  	}
+  	let tile = {
        	sx:e.changedTouches[0].clientX,
        	sy:e.changedTouches[0].clientY,
        	sr:15,
@@ -94,9 +101,10 @@ export default class Prop {
        let temp = new Tile();
        temp.init(tile);
        databus.game_map.data.push(temp)
-      this.ok = true;
+       this.ok = true;
+       this.touchstart = false;
+       this.move_prop_moving = false;
       }
-      this.touchstart = false;
     })
   }
 }

@@ -1,4 +1,4 @@
-import Game_Map from "../base/game_map-new";
+import Game_Map from "../base/game_map";
 
 /**
  * 游戏界面

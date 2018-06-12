@@ -13,19 +13,21 @@ const TAU = 2 * Math.PI;
 
 export default class Player {
 
-  constructor() {
+  constructor(o) {
     // 坐标
-    this.x = w / 2;
-    this.y = 3 * h / 4;
-    // 地图坐标
-    this.mx = 0;
-    this.my = 0;
+    this.sx = o.sx || w / 2;
+    this.sy = o.sy || 3 * h / 4;
+    this.sr = o.sr;
+    this.color = "#000";
+    // 地图坐标 
+    this.mx = o.mx || 0;
+    this.my = o.my || 0;
+    this.limit = o.limit || 200;
+    this.mr = o.mr || 0;
     // 偏移量
     this.xr = 0;
     this.yr = 0;
     // 半径
-    this.r = 20;
-    this.color = "#000";
     this.speed = 5;
     this.lineWidth = 2;
     this.direction = 0;
@@ -44,16 +46,15 @@ export default class Player {
     this.end_positionY = 0;
     // 事件监听初始化
     this.initEvent();
-    //限制器
-    this.limit = 200;
   }
+
   /**
    * 简单的碰撞检测定义：
    * @param{Tile} ti: Tile 的实例
    */
   isCollideToTile(ti) {
     if (!ti.isAlive) { return false }
-    this.collision = Util.isCircleIntersectBall(this.x, this.y, ti.mx, ti.my, this.r, ti.mr);
+	  this.collision = Util.isCircleIntersectBall(this.sx, this.sy, ti.sx, ti.sy, this.sr, ti.sr);
     return this.collision;
   }
   /**
@@ -65,7 +66,7 @@ export default class Player {
       return;
     }
     this.direction = Util.directionBetweenTwoPoints(0, 0, this.xr, this.yr);
-    this.rad = Util.computeReflectionAngle(this.x, this.y, this.direction, ti.mx, ti.my);
+    this.rad = Util.computeReflectionAngle(this.sx, this.sy, this.direction, ti.sx, ti.sy);
     this.yr = Math.sin(this.rad) * this.speed;
     this.xr = Math.cos(this.rad) * this.speed;
   }
@@ -76,29 +77,29 @@ export default class Player {
   update() {
     // 判断是否选中
     if (this.end_positionX == 0 && this.end_positionY == 0) {
-      if (this.positionX < (w / 2 + 20) && this.positionX > (w / 2 - 20) && this.positionY > (3 * h / 4 - 20) && this.positionY < (3 * h / 4 + 20)) {
+      if (this.positionX < (databus.player_sx + 20) && this.positionX > (databus.player_sx - 20) && this.positionY > (databus.player_sy - 20) && this.positionY < (databus.player_sy + 20)) {
         this.check = 1;
       }
       if (this.check == 1) {
         // 不要管 
-        this._x = (w / 2 - this.positionX);
-        this._y = (3 * h / 4 - this.positionY);
+        this._x = (databus.player_sx - this.positionX);
+        this._y = (databus.player_sy - this.positionY);
         this.distance = Math.abs(this._x) + Math.abs(this._y);
         this.speed = this.distance / 20 > 7 ? this.distance / 20 : 7;
         this.lineWidth = (30 - this.speed) / 3;
-        this.x = this.positionX;
-        this.y = this.positionY;
-        if (this.y < this.limit) {
-          this.y = this.limit;
+        this.sx = this.positionX;
+        this.sy = this.positionY;
+        if (this.sy < this.limit-databus.pui_sy) {
+          this.sy = this.limit;
         }
-        if (this.y > h - this.r) {
-          this.y = h - this.r;
+        if (this.sy > databus.pui_sh-databus.pui_sy - this.sr) {
+          this.sy = databus.pui_sh - this.sr;
         }
-        if (this.x < this.r) {
-          this.x = this.r;
+        if (this.sx < this.sr+databus.pui_sx) {
+          this.sx = this.sr;
         }
-        if (this.x > w - this.r) {
-          this.x = w - this.r;
+        if (this.sx > databus.pui_sw - this.sr-databus.pui_sy) {
+          this.sx = databus.pui_sw - this.sr;
         }
       }
     } else {
@@ -106,8 +107,8 @@ export default class Player {
         this.check2 = 1;
         if (this.xr === 0 && this.yr === 0) {
           //计算方向和速度
-          this._x = (w / 2 - this.end_positionX);
-          this._y = (3 * h / 4 - this.end_positionY);
+          this._x = (databus.player_sx - this.end_positionX);
+          this._y = (databus.player_sy - this.end_positionY);
           this.distance = Math.abs(this._x) + Math.abs(this._y);
           this.speed = this.distance / 20 > 7 ? this.distance / 20 : 7;
           this.lineWidth = 10 - this.speed;
@@ -116,33 +117,33 @@ export default class Player {
           this.cos = this._y / this.R;
           this.xr = this.sin * this.speed;
           this.yr = this.cos * this.speed;
-          this.count = 30;
+          this.count = 3;
         }
         //判断边界碰撞
-        if (this.x - this.r < 0 || this.x + this.r > w) {
+        if (this.sx - this.sr+databus.pui_sx < 0 || this.sx + this.sr > databus.pui_sw-databus.pui_sx) {
           this.xr = -this.xr;
           this.count = this.count - 1;
         }
-        if (this.y + this.r < h - 230) {
+        if (this.sy + this.sr+databus.pui_sy < databus.pui_sh - 230*databus.scale) {
           this.check3 = 1;
-        } else if (this.y + this.r > h) {
+        } else if (this.sy + this.sr > databus.pui_sh) {
           this.yr = -this.yr;
         }
-        if (this.y - this.r < 0 || this.y + this.r > h - 230 && this.check3 === 1) {
+        if (this.sy - this.sr < h-databus.pui_sh || this.sy + this.sr > databus.pui_sh - 230*databus.scale && this.check3 === 1) {
           this.yr = -this.yr;
           this.count = this.count - 1;
         }
 
         //球移动
-        this.x += this.xr
-        this.y += this.yr
+        this.sx += this.xr
+        this.sy += this.yr
         //碰撞完毕 恢复函数
         if (this.count < 1) {
-          this.x = w / 2;
-          this.y = 3 * h / 4;
+          this.sx = databus.player_sx;
+          this.sy = databus.player_sy; 
           this.xr = 0;
           this.yr = 0;
-          this.r = 20;
+          this.sr = databus.player_sr;
           this.color = "#000";
           this.speed = 5;
           this.count = 0;
@@ -168,18 +169,18 @@ export default class Player {
    */
   draw(ctx) {
     ctx.beginPath();
-    if (this.y < this.limit && this.check2 != 1) {
-      ctx.arc((0.5 + this.x) | 0, (0.5 + this.limit) | 0, this.r, 0, TAU, false);
+    if (this.sy < this.limit && this.check2 != 1) {
+      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.limit) | 0, this.sr, 0, TAU, false);
     } else {
-      ctx.arc((0.5 + this.x) | 0, (0.5 + this.y) | 0, this.r, 0, TAU, false);
+      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.sy) | 0, this.sr, 0, TAU, false);
     }
     ctx.fillStyle = this.color;
     if (this.count == 0) {
-      ctx.moveTo(w / 2, 3 * h / 4);
-      if (this.y > this.limit) {
-        ctx.lineTo(this.x, this.y);
+      ctx.moveTo(databus.player_sx, databus.player_sy);
+      if (this.sy > this.limit) {
+        ctx.lineTo(this.sx, this.sy);
       } else {
-        ctx.lineTo(this.x, this.limit);
+        ctx.lineTo(this.sx, this.limit);
       }
       ctx.lineWidth = this.lineWidth;
       ctx.strokeStyle = "#fff"

@@ -29,6 +29,12 @@ export default class BackGround {
     this.const_y = 3 * h / 4;
     this.const_r = 5;
     this.const_color = "#fff";
+    //移动道具
+    this.mx = 0;
+    this.my = 3 * h / 4-10;;
+    this.mw = w;
+    this.mh = h / 8;
+    this.move_prop_color = "#ffa07a"
   }
   /**
    * 逻辑，TODO：颜色渐变
@@ -44,13 +50,21 @@ export default class BackGround {
     ctx.fillStyle = this.color;//填充颜色,默认是黑色
     ctx.rect(this.start_x, this.start_y, this.width, this.height-this.h)
     ctx.fill();
+    //道具区
     ctx.beginPath();
     ctx.fillStyle = this.prop_color;//填充颜色,默认是黑色
     ctx.rect(this.x, this.y, this.w, this.h)
     ctx.fill();
+     //移动道具区
+    ctx.beginPath();
+    ctx.fillStyle = this.move_prop_color;//填充颜色,默认是黑色
+    ctx.rect(this.mx, this.my, this.mw, this.mh)
+    ctx.fill();
+    //中心小球
     ctx.beginPath();
     ctx.arc((0.5 + this.const_x) | 0, (0.5 + this.const_y) | 0, this.const_r, 0, TAU, false);
     ctx.fillStyle = this.const_color;
     ctx.fill();
+   
   }
 }

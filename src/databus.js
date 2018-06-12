@@ -30,7 +30,6 @@ export default class DataBus {
   initGobalData(){
     this.screenWidth = window.innerWidth
     this.screenHeight = window.innerHeight
-    console.log('w: '+this.screenWidth+', h: '+this.screenHeight)
     this.version = '1.0.3'
     this.ballIsRun =false;
     this.color ={

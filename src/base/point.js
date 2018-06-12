@@ -84,16 +84,4 @@ export default class Point {
   isIn(startX, startY, endX, endY){
     return (this.x > startX && this.y > startY && this.x < endX && this.y < endY)
   }
-  /**
-   * Point(px, py) 在 Rectangle(rx, ry, rw, rh) 内
-   * @param {*} px 
-   * @param {*} py 
-   * @param {*} rx 
-   * @param {*} ry 
-   * @param {*} rw 
-   * @param {*} rh 
-   */
-  static inRect(px, py, rx, ry, rw, rh){
-    return (px > rx && py > ry && px < rx+rw && py < ry+rh)
-  }
 }
