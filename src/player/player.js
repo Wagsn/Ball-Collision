@@ -2,22 +2,25 @@
 
 import Point from '../base/point'
 import DataBus from '../databus'
-import Util from '../util/util';
+import Util from '../util/util'
 
+const databus = new DataBus()
 
-let w = window.innerWidth
-let h = window.innerHeight
-
-let databus = new DataBus()
-const TAU = 2 * Math.PI;
+const __={
+  initX: Symbol('initX'),
+  initY: Symbol('initY')
+}
 
 export default class Player {
 
   constructor(o) {
     // 坐标
-    this.sx = o.sx || w / 2;
-    this.sy = o.sy || 3 * h / 4;
+    this.sx = o.sx || databus.screenWidth / 2;
+    this.sy = o.sy || 3 * databus.screenHeight / 4;
     this.sr = o.sr;
+    this.initX =this.sx
+    this.initY =this.sy
+    this.initR =this.sr
     this.color = "#000";
     // 地图坐标 
     this.mx = o.mx || 0;
@@ -70,20 +73,19 @@ export default class Player {
     this.yr = Math.sin(this.rad) * this.speed;
     this.xr = Math.cos(this.rad) * this.speed;
   }
-
   /**
    * 逻辑刷新
    */
   update() {
     // 判断是否选中
     if (this.end_positionX == 0 && this.end_positionY == 0) {
-      if (this.positionX < (databus.player_sx + 20) && this.positionX > (databus.player_sx - 20) && this.positionY > (databus.player_sy - 20) && this.positionY < (databus.player_sy + 20)) {
+      if (this.positionX < (this.initX + 20) && this.positionX > (this.initX - 20) && this.positionY > (this.initY - 20) && this.positionY < (this.initY + 20)) {
         this.check = 1;
       }
       if (this.check == 1) {
         // 不要管 
-        this._x = (databus.player_sx - this.positionX);
-        this._y = (databus.player_sy - this.positionY);
+        this._x = (this.initX - this.positionX);
+        this._y = (this.initY - this.positionY);
         this.distance = Math.abs(this._x) + Math.abs(this._y);
         this.speed = this.distance / 20 > 7 ? this.distance / 20 : 7;
         this.lineWidth = (30 - this.speed) / 3;
@@ -107,8 +109,8 @@ export default class Player {
         this.check2 = 1;
         if (this.xr === 0 && this.yr === 0) {
           //计算方向和速度
-          this._x = (databus.player_sx - this.end_positionX);
-          this._y = (databus.player_sy - this.end_positionY);
+          this._x = (this.initX - this.end_positionX);
+          this._y = (this.initY - this.end_positionY);
           this.distance = Math.abs(this._x) + Math.abs(this._y);
           this.speed = this.distance / 20 > 7 ? this.distance / 20 : 7;
           this.lineWidth = 10 - this.speed;
@@ -129,7 +131,7 @@ export default class Player {
         } else if (this.sy + this.sr > databus.pui_sh) {
           this.yr = -this.yr;
         }
-        if (this.sy - this.sr < h-databus.pui_sh || this.sy + this.sr > databus.pui_sh - 230*databus.scale && this.check3 === 1) {
+        if (this.sy - this.sr < databus.screenHeight-databus.pui_sh || this.sy + this.sr > databus.pui_sh - 230*databus.scale && this.check3 === 1) {
           this.yr = -this.yr;
           this.count = this.count - 1;
         }
@@ -139,11 +141,11 @@ export default class Player {
         this.sy += this.yr
         //碰撞完毕 恢复函数
         if (this.count < 1) {
-          this.sx = databus.player_sx;
-          this.sy = databus.player_sy; 
+          this.sx = this.initX;
+          this.sy = this.initY; 
           this.xr = 0;
           this.yr = 0;
-          this.sr = databus.player_sr;
+          this.sr = this.initR;
           this.color = "#000";
           this.speed = 5;
           this.count = 0;
@@ -167,12 +169,12 @@ export default class Player {
    * 重绘自身
    * @param {CanvasRenderingContext2D} ctx 
    */
-  draw(ctx) {
+  drawTo(ctx) {
     ctx.beginPath();
     if (this.sy < this.limit && this.check2 != 1) {
-      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.limit) | 0, this.sr, 0, TAU, false);
+      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.limit) | 0, this.sr, 0, databus.TAU, false);
     } else {
-      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.sy) | 0, this.sr, 0, TAU, false);
+      ctx.arc((0.5 + this.sx) | 0, (0.5 + this.sy) | 0, this.sr, 0, databus.TAU, false);
     }
     ctx.fillStyle = this.color;
     if (this.count == 0) {

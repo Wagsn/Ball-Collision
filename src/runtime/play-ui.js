@@ -1,6 +1,5 @@
 
 import DataBus from '../databus'
-import BackGround from '../runtime/back-ground'
 import GameMap from '../base/game_map'
 import PropMap from '../base/prop_map'
 import MovePropMap from '../base/move_prop_map'
@@ -46,13 +45,15 @@ export default class Play_UI {
     this.sy = o.sy || 0;
     this.sw = o.sw || 900;
     this.sh = o.sh || 1600;
-    console.log(this.sw, this.sh)
     // 如果比较宽
     if (this.sw / this.sh > 9 / 16) {
       this.sw = this.sh * (9 / 16);
     } else {
       this.sh = this.sw * (16 / 9);
     }
+    this.sx = this.sx + (o.sw - this.sw) / 2
+    this.sy = this.sy + (o.sh - this.sh) / 2
+    console.log('屏幕显示区域：Rectangle {x: ' + this.sh + ', y: ' + this.sy + ', w: ' + this.sw + ', h: ' + this.sh + '}')
     // 所占地图面积(固定)，默认长宽比 16:9
     this.mx = 0;
     this.my = 0;
@@ -76,65 +77,53 @@ export default class Play_UI {
       // 地图坐标
       mx: this.mw / 2,
       my: this.mh * 5 / 6,
-      // 坐标
+      // 屏幕坐标
       sx: this.sx + this.mw / 2 * this.scale,
       sy: this.sy + this.mh * 5 / 6 * this.scale,
       mr: 40,
       sr: 40 * this.scale,
       color: "#000",
       limit: this.sy + 300 * this.scale
-
     }
-    let player_sx = this.sx + this.mw / 2 * this.scale
-    let player_sy = this.sy + this.mh * 5 / 6 * this.scale
-    let player_sr = 40 * this.scale
-    databus.player_sx = player_sx
-    databus.player_sy = player_sy
-    databus.player_sr = player_sr
     this.player = new Player(player)
     databus.player = this.player
     databus.ready = this.ready
 
-    let prop_map =
-      {
-        id: 1001,
-        columns: 5,
-        rows: 1,
-        data:  // type
-          [
-            ['ice'], ['ice'], ['prop'], ['prop'], ['ice'],
-          ]
-      }
-    let move_prop_map =
-      {
-        id: 1001,
-        columns: 5,
-        rows: 1,
-        data:  // type
-          [
-            ['flat'], ['flat'], ['bloom'],
-          ]
-      }
+    let prop_map = {
+      id: 1001,
+      columns: 5,
+      rows: 1,
+      data:  // type
+        [
+          ['ice'], ['ice'], ['prop'], ['prop'], ['ice'],
+        ]
+    }
+    let move_prop_map = {
+      id: 1001,
+      columns: 5,
+      rows: 1,
+      data:  // type
+        [
+          ['flat'], ['flat'], ['bloom'],
+        ]
+    }
     // 计算所占地图区域
-    let game_map =
-      {
-        p_id: 1,
-        id: 1001,
-        cols: 12,
-        rows: 8,
-        data: this.randomMap(),
-        mx: this.mx,
-        my: this.my + 100,
-        mw: 900,
-        mh: 1300,
-        // 计算所占显示区域
-        sx: this.sx,
-        sy: this.sy + (this.my + 100) * this.scale,
-        sw: 900 * this.scale,
-        sh: 1300 * this.scale
-      }
-
-
+    let game_map = {
+      p_id: 1,
+      id: 1001,
+      cols: 12,
+      rows: 8,
+      data: this.randomMap(),
+      mx: this.mx,
+      my: this.my + 100,
+      mw: 900,
+      mh: 1300,
+      // 计算所占显示区域
+      sx: this.sx,
+      sy: this.sy + (this.my + 100) * this.scale,
+      sw: 900 * this.scale,
+      sh: 1300 * this.scale
+    }
     this.game_map = new GameMap(game_map)
     databus.game_map = this.game_map
     var p_map = prop_map
@@ -281,7 +270,6 @@ export default class Play_UI {
     }
   }
   update() {
-    //	console.log(this.ready)
     if (this.ready) {
       this.player.update(this.type)
       this.count()
@@ -290,11 +278,19 @@ export default class Play_UI {
     }
     this.before_launch();
   }
+  /**
+   * 重绘自身
+   * @param {*} ctx 
+   */
   drawTo(ctx) {
-    this.player.draw(ctx)
+    // 1st draw back ground
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.sx, this.sy, this.sw, this.sh);
+    // 2nd draw childs
+    this.player.drawTo(ctx)
     this.game_map.drawTo(ctx)
     this.prop_map.drawTo(ctx)
     this.move_prop_map.drawTo(ctx)
-    this.player.draw(ctx)
+    this.player.drawTo(ctx)
   }
 }

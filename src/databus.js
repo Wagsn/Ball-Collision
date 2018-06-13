@@ -30,7 +30,8 @@ export default class DataBus {
   initGobalData(){
     this.screenWidth = window.innerWidth
     this.screenHeight = window.innerHeight
-    this.version = '1.0.3'
+    this.version = '0.0.3'
+    this.TAU = 2 * Math.PI;
     this.ballIsRun =false;
     this.color ={
       bg_default: "#EEE8AB"

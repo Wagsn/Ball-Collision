@@ -1,17 +1,10 @@
 
 import DataBus from './databus'
 import BackGround from './runtime/back-ground'
-import GameMap from './base/game_map'
-import PropMap from './base/prop_map'
-import MovePropMap from './base/move_prop_map'
-import Player from './player/player'
-import Prop from './prop/prop'
-import MoveProp from './move_prop/move_prop'
 import Play_UI from './runtime/play-ui';
+
 let ctx = canvas.getContext('2d')
 let databus = new DataBus()
-let w = window.innerWidth
-let h = window.innerHeight
 
 /**
  * 球球对撞游戏主函数，
@@ -26,14 +19,12 @@ export default class Main {
     databus.reset()
     // 游戏初始化
     this.bg = new BackGround()
-
-   this.playUI =new Play_UI({
-     sy: 0,
-     sy: 0,
-     sw: databus.screenWidth,
-     sh: databus.screenHeight
-   });
-    
+    this.playUI = new Play_UI({
+      sy: 0,
+      sy: 0,
+      sw: databus.screenWidth,
+      sh: databus.screenHeight
+    });
     // 游戏循环绑定
     this.bindLoop = this.loop.bind(this)
     this.hasEventBind = false
@@ -47,9 +38,7 @@ export default class Main {
   }
 
   update() {
-
     this.playUI.update();
-
   }
   render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
